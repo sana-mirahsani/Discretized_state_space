@@ -184,4 +184,6 @@ u = [-5, 0 ,5]
 
 p_bins_array, v_bins_array, all_states = rectangle_discretized_state_space(p_tuple, v_tuple, grid_num_p ,grid_num_v)
 V, policy = value_iteration_pendulum(p_bins_array, v_bins_array, all_states, u)
-#all_states = create_states(p_bins_array,v_bins_array)
+
+print(V)
+print(policy)
