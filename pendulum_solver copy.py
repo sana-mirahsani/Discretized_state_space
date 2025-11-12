@@ -64,7 +64,7 @@ def acceleration_calculation(current_p = 0, current_v = 0, current_u = 0, g = 9.
 
     return (1/m*pow(l,2)) * (-(µ*current_v) + (m*g*l*(np.sin(current_p)))+ current_u)
 
-def new_state_calculation(a, current_p , current_v, delta_t = 0.01): 
+def new_state_calculation(a, current_v, current_p , delta_t = 0.01): 
     new_v = current_v + (a * delta_t) 
     new_p = current_p + (new_v * delta_t) 
     return new_p, new_v
@@ -78,20 +78,102 @@ def initialization_pendulum():
 
     return p_tuple, v_tuple, u, grid_num_p, grid_num_v
 
-def transition_calculation(current_p, current_v , delta_t = 0.01):
+def transition_calculation(current_cell_id, action, p_bins, v_bins, grid_dict, delta_t = 0.01):
     
-    # 1. Compute acceleration
+    # 1. Get current continuous state (center of cell)
+    current_p, current_v = find_p_v(current_cell_id, grid_dict)
+
+    # 2. Compute acceleration
     a = acceleration_calculation(current_p, current_v, g = 9.81, m = 1 ,µ = 0.01, l = 1)
 
     # 3. Compute next continuous state
-    new_p, new_v = new_state_calculation(a, current_p, current_v, delta_t)
-    
-    return new_p, new_v
+    new_p, new_v = new_state_calculation(a, current_v, current_p, delta_t)
 
+    # 4. Map to discrete cell
+    new_cell_id = find_cell(new_p, new_v, p_bins, v_bins)
+    
+    return new_cell_id 
+
+def find_p_v(cell_id, grid_dict):
+
+    corners = grid_dict[cell_id]
+    p = (corners[0][0] + corners[1][0]) / 2
+    v = (corners[0][1] + corners[3][1]) / 2
+
+    return p, v
+
+def find_cell(p,v,p_bins,v_bins):
+
+    # Find the bin index
+    i = np.digitize(p, p_bins) - 1
+    j = np.digitize(v, v_bins) - 1
+
+    # Clip indices to stay inside the grid
+    i = np.clip(i, 0, len(p_bins) - 2)
+    j = np.clip(j, 0, len(v_bins) - 2)
+
+    # Flatten 2D grid to 1D index
+    num_v = len(v_bins) - 1   # number of vertical cells (velocity)
+    cell_id = i * num_v + j
+
+    return cell_id
 
 def reward_calculation(current_p):
     return np.cos(current_p)
 
+def value_iteration_pendulum(p_bins, v_bins, grid_dict, actions, gamma=0.95, epsilon=1e-6, max_iterations=1000):
+    """
+    Value Iteration for the discretized inverted pendulum (deterministic transitions).
+    """
+    num_states = len(grid_dict)
+    num_actions = len(actions)
+    V = np.zeros(num_states)  # value function
+
+    for iteration in range(max_iterations):
+        delta = 0
+        V_new = np.zeros(num_states)
+
+        for cell_id in range(num_states):
+
+            Q_values = []
+
+            for u in actions:
+
+                # calculate the next state
+                next_cell_id = transition_calculation(cell_id, u, p_bins, v_bins, grid_dict, delta_t = 0.01)
+                # Reward (cosine of angle)
+                current_p, current_v = find_p_v(cell_id, grid_dict)
+                r = reward_calculation(current_p)
+                
+                # Bellman update for deterministic transition
+                Q = r + gamma * V[next_cell_id]
+                Q_values.append(Q)
+
+            # Update value of state
+            V_new[cell_id] = np.max(Q_values)
+            delta = max(delta, abs(V_new[cell_id] - V[cell_id]))
+
+        V = V_new.copy()
+        if delta < epsilon:
+            print(f"Converged after {iteration+1} iterations.")
+            break
+
+    # Derive the policy
+    policy = np.zeros(num_states, dtype=int)
+    for cell_id in range(num_states):
+        
+        current_p, current_v = find_p_v(cell_id, grid_dict)
+
+        Q_values = []
+        for u in actions:
+            # calculate the next state
+            next_cell_id = transition_calculation(cell_id, u, p_bins, v_bins, grid_dict, delta_t = 0.01)
+            r = reward_calculation(current_p)
+            Q = r + gamma * V[next_cell_id]
+            Q_values.append(Q)
+        policy[cell_id] = np.argmax(Q_values)
+
+    return V, policy
 # =============================================================================
 # Main
 # =============================================================================     
