@@ -26,8 +26,8 @@ from value_iteration_policy import value_iteration_policy_func
 # =============================================================================
 # Initialize the values
 def initialization_car_in_mountains():
-    p_tuple = (-0.6, -0.4)
-    v_tuple = (0,0)
+    p_tuple = (-1.2, 0.6)
+    v_tuple = (-0.07,0.07)
     u = [-1, 0, +1]
     grid_num_p = 40
     grid_num_v = 40
@@ -38,16 +38,15 @@ def clip(value, min_value, max_value):
     return np.clip(value, min_value, max_value)
 
 # Transition function
-def transition_calculation(current_p , current_v, u): 
+def transition_calculation_car(current_p , current_v, u): 
 
     new_v = clip(value = current_v + (0.001 * u) - (0.0025 * np.cos(3*current_p)), min_value = -0.07, max_value = 0.07)
     new_p = clip(value = current_p + new_v, min_value = -1.2, max_value = 0.6)
     return new_p, new_v
 
 # Reward function
-def reward_calculation(current_p, current_v, u, next_p, next_v):
-    if next_p >= 0.5:
-        return 0
+def reward_calculation_car(current_p, current_v, u, next_p, next_v):
+    
     return -1
 
 # Main function of process
@@ -59,11 +58,10 @@ def car_in_mointain_solver_func():
     p_bins_array, v_bins_array, all_states = rectangle_discretized_state_space(p_tuple, v_tuple, grid_num_p ,grid_num_v)
 
     # 3. Find the optimal policy by value iteration
-    V, policy = value_iteration_policy_func(transition_calculation, reward_calculation, p_bins_array, v_bins_array, all_states, u, gamma=0.95, epsilon=1e-6, max_iterations=1000)
+    V, policy = value_iteration_policy_func(transition_calculation_car, reward_calculation_car, p_bins_array, v_bins_array, all_states, u, gamma=0.95, epsilon=1e-6, max_iterations=1000)
 
-    # 4. Print the result
-    print(f"Value of the best policy : {V}")
-    print(f"The optimal policy : {policy}")
+    # 4. Return the result
+    return V, policy
 
 # =============================================================================
 # Run the main
@@ -71,4 +69,7 @@ def car_in_mointain_solver_func():
 
 if __name__ == '__main__':    
     print("=============== Solving Car Mountain Problem ===============") 
-    car_in_mointain_solver_func()
+    V_optimal, policy_optimal = car_in_mointain_solver_func()
+
+    print(f"Value of the best policy : {V_optimal}")
+    print(f"The optimal policy : {policy_optimal}")

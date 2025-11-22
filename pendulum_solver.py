@@ -42,7 +42,7 @@ def new_state_calculation(a, current_p , current_v, delta_t = 0.01):
     return new_p, new_v
 
 # Transition function
-def transition_calculation(current_p, current_v, u, delta_t = 0.01):
+def transition_calculation_pendulum(current_p, current_v, u, delta_t = 0.01):
     
     # 1. Compute acceleration
     a = acceleration_calculation(current_p, current_v, u, g = 9.81, m = 1 ,µ = 0.01, l = 1)
@@ -53,7 +53,7 @@ def transition_calculation(current_p, current_v, u, delta_t = 0.01):
     return new_p, new_v
 
 # Reward function
-def reward_calculation(current_p, current_v, u, next_p, next_v):
+def reward_calculation_pendulum(current_p, current_v, u, next_p, next_v):
     return np.cos(current_p)
 
 # Main function of process
@@ -65,15 +65,19 @@ def pendulum_solver_func():
     p_bins_array, v_bins_array, all_states = rectangle_discretized_state_space(p_tuple, v_tuple, grid_num_p ,grid_num_v)
 
     # 3. Find the optimal policy by value iteration
-    V, policy = value_iteration_policy_func(transition_calculation, reward_calculation, p_bins_array, v_bins_array, all_states, u, gamma=0.95, epsilon=1e-6, max_iterations=1000)
+    V, policy = value_iteration_policy_func(transition_calculation_pendulum, reward_calculation_pendulum, p_bins_array, v_bins_array, all_states, u, gamma=0.95, epsilon=1e-6, max_iterations=1000)
 
-    # 4. Print the result
-    print(f"Value of the best policy : {V}")
-    print(f"The optimal policy : {policy}")
+    # 4. Return the result
+    return V, policy
+    
 # =============================================================================
 # Run the main
 # =============================================================================     
 
 if __name__ == '__main__':    
     print("=============== Solving Pendulum Problem ===============")  
-    pendulum_solver_func()
+    V_optimal, policy_optimal = pendulum_solver_func()
+
+    print(f"Value of the best policy : {V_optimal}")
+    print(f"The optimal policy : {policy_optimal}")
+    print(len(policy_optimal))
