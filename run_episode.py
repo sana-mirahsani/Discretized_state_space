@@ -12,7 +12,40 @@ from car_in_the_mountains_solver import initialization_car_in_mountains, transit
 # 1. Create the trajectory
 # =============================================================================
 def trajectory(transition_calculation, reward_calculation, policy_optimal, u, P0, V0, p_bins, v_bins, gamma, max_steps, termination_condition=None):
+    """
+    Simulates a trajectory of an agent following an optimal policy and computes the cumulative discounted reward.
     
+    Args:
+
+        transition_calculation (callable) – Function to compute the next state given the current state and action.
+
+        reward_calculation (callable) – Function to compute the reward given the current and next states and action.
+
+        policy_optimal (np.ndarray) – Optimal policy mapping each discretized state to an action index.
+
+        u (list or np.ndarray) – List of possible actions.
+
+        P0 (float) – Initial position.
+
+        V0 (float) – Initial velocity.
+
+        p_bins (np.ndarray) – Discretized position bins.
+
+        v_bins (np.ndarray) – Discretized velocity bins.
+
+        gamma (float) – Discount factor for future rewards.
+
+        max_steps (int) – Maximum number of steps to simulate.
+
+        termination_condition (callable, optional) – Function that takes (current_p, current_v) and returns True if the simulation should stop early. Default is None.
+
+    Returns:
+
+        traj (list of tuples) – List of transitions in the form (current_cell_id, action_taken, reward, next_cell_id).
+
+        G (float) – Cumulative discounted reward for the trajectory.
+    """
+
     G = 0
     traj = []
     gamma_t = 1 
@@ -45,6 +78,31 @@ def trajectory(transition_calculation, reward_calculation, policy_optimal, u, P0
 # 2. 20 run episode
 # =============================================================================
 def twenty_run_episode(transition_calculation_func, reward_calculation_func, initialization_func, first_p_func, first_v_func, gamma, max_step, termination_condition=None):
+    """
+    Runs 20 episodes of a control problem using the optimal policy and returns the cumulative rewards for each episode.
+
+    Args:
+
+        transition_calculation_func (callable) – Function to compute the next state given the current state and action.
+
+        reward_calculation_func (callable) – Function to compute the reward given the current and next states and action.
+
+        initialization_func (callable) – Function that initializes the environment parameters and discretization settings.
+
+        first_p_func (callable) – Function that returns the initial position for an episode.
+
+        first_v_func (callable) – Function that returns the initial velocity for an episode.
+
+        gamma (float) – Discount factor for future rewards.
+
+        max_step (int) – Maximum number of steps per episode.
+
+        termination_condition (callable, optional) – Function that takes (current_p, current_v) and returns True if the episode should end early. Default is None.
+
+    Returns:
+
+        list_of_R (list of float) – List of cumulative discounted rewards for each of the 20 episodes.   
+    """
     # 1. Initialize the states, actions, space
     p_tuple, v_tuple, u, grid_num_p, grid_num_v = initialization_func()
 
@@ -96,6 +154,15 @@ def plot_returns(R_list, title="Distribution of Returns"):
 # 4. Run test for pendulum problem
 # =============================================================================
 def pendulum_problem():
+    """
+    Runs 20 episodes of the pendulum problem with random initial states, plots the distribution of returns, and prints the median return.
+    
+    Args:
+        This function takes no arguments.
+
+    Returns:
+        This function does not return anything.
+    """
     print("=============== Twenty Run Episode for Pendulum Problem ===============")  
     def first_p():
         return np.random.uniform(-np.pi, np.pi)
@@ -112,6 +179,15 @@ def pendulum_problem():
 # 5. Run test for car in mountain problem
 # =============================================================================
 def car_in_mountain_problem():
+    """
+    Runs 20 episodes of the mountain car problem with random initial positions, plots the distribution of returns, and prints the median return.  
+    
+    Args:
+        This function takes no arguments.
+
+    Returns:
+        This function does not return anything.
+    """
     print("=============== Twenty Run Episode for Car In Mountain Problem ===============")  
     def first_p():
         return np.random.uniform(-0.6, -0.4)

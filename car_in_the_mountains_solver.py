@@ -19,13 +19,30 @@
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-from discretized_state_space import rectangle_discretized_state_space, find_cell, find_p_v
+from discretized_state_space import rectangle_discretized_state_space
 from value_iteration_policy import value_iteration_policy_func
 # =============================================================================
 # 1. Functions
 # =============================================================================
 # Initialize the values
 def initialization_car_in_mountains():
+    """
+    Initializes the parameter ranges and settings for the mountain car environment.
+    
+    Args:
+        This function takes no arguments.
+
+    Returns:
+        p_tuple (tuple[float, float]) – The minimum and maximum position values.
+
+        v_tuple (tuple[float, float]) – The minimum and maximum velocity values.
+
+        u (list[int]) – The set of possible actions (accelerations).
+
+        grid_num_p (int) – Number of grid points used to discretize the position space.
+
+        grid_num_v (int) – Number of grid points used to discretize the velocity space.
+    """
     p_tuple = (-1.2, 0.6)
     v_tuple = (-0.07,0.07)
     u = [-1, 0, +1]
@@ -35,22 +52,79 @@ def initialization_car_in_mountains():
     return p_tuple, v_tuple, u, grid_num_p, grid_num_v
 
 def clip(value, min_value, max_value):
+    """
+    Clips a value to ensure it lies within a specified range.
+    
+    Args:
+        value (float or np.ndarray) – The input value or array to be clipped.
+
+        min_value (float) – The minimum allowed value.
+
+        max_value (float) – The maximum allowed value.
+
+    Returns:
+        float or np.ndarray – The clipped value or array, constrained between min_value and max_value.
+    """
+
     return np.clip(value, min_value, max_value)
 
 # Transition function
 def transition_calculation_car(current_p , current_v, u): 
+    """
+    Computes the next position and velocity of the car in the mountain car environment given the current state and action.
+    
+    Args:
+        current_p (float) – Current position of the car.
 
+        current_v (float) – Current velocity of the car.
+
+        u (int or float) – Action applied to the car (acceleration).
+
+    Returns:
+        new_p (float) – Updated position after applying the action and environment dynamics.
+
+        new_v (float) – Updated velocity after applying the action and environment dynamics.
+    """
+    
     new_v = clip(value = current_v + (0.001 * u) - (0.0025 * np.cos(3*current_p)), min_value = -0.07, max_value = 0.07)
     new_p = clip(value = current_p + new_v, min_value = -1.2, max_value = 0.6)
     return new_p, new_v
 
 # Reward function
 def reward_calculation_car(current_p, current_v, u, next_p, next_v):
+    """
+    Calculates the reward for the mountain car environment transition.
     
+    Args:
+        current_p (float) – Current position of the car.
+
+        current_v (float) – Current velocity of the car.
+
+        u (int or float) – Action applied to the car.
+
+        next_p (float) – Next position after applying the action.
+
+        next_v (float) – Next velocity after applying the action.
+
+    Returns:
+        int – Reward for the transition (always -1 in this implementation).
+    """
     return -1
 
 # Main function of process
 def car_in_mointain_solver_func():
+    """
+    Solves the mountain car problem using discretization and value iteration to compute the optimal value function and policy.
+    
+    Args:
+        This function takes no arguments.
+
+    Returns:
+        V (np.ndarray) – Optimal value function for all discretized states.
+
+        policy (np.ndarray) – Optimal action to take at each discretized state.
+    """
+
     # 1. Create the problem
     p_tuple, v_tuple, u, grid_num_p, grid_num_v = initialization_car_in_mountains()
 
