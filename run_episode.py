@@ -130,7 +130,8 @@ def car_in_mountain_problem():
 # Run the main
 # =============================================================================     
 if __name__ == '__main__':    
-    #pendulum_problem()
+    
+    pendulum_problem()
 
     # Remove the comment to run the car_in_mountain function
-    car_in_mountain_problem()
+    #car_in_mountain_problem()
