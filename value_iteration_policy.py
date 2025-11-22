@@ -8,10 +8,11 @@ from discretized_state_space import find_cell, find_p_v
 # =============================================================================
 # 1. Value iteration function
 # =============================================================================
-def value_iteration_pendulum(transition_func, reward_func, p_bins, v_bins, grid_dict, actions, gamma=0.95, epsilon=1e-6, max_iterations=1000):
+def value_iteration_policy_func(transition_func, reward_func, p_bins, v_bins, grid_dict, actions, gamma=0.95, epsilon=1e-6, max_iterations=1000):
     """
     Value Iteration for the discretized inverted pendulum (deterministic transitions).
     """
+    print("start to find the optimal policy...wait!")
     num_states = len(grid_dict)
     num_actions = len(actions)
     V = np.zeros(num_states)  # value function
@@ -24,19 +25,21 @@ def value_iteration_pendulum(transition_func, reward_func, p_bins, v_bins, grid_
 
             Q_values = []
 
-            # Get current continuous state (center of cell)
+            # 1. Get current continuous state (center of cell)
             current_p, current_v = find_p_v(cell_id, grid_dict)
 
             for u in actions:
 
-                # calculate the next state
-                next_p, next_v = transition_func(current_p, current_v, delta_t = 0.01)
-                # Map to cell_id
+                # 2. Calculate the next state
+                next_p, next_v = transition_func(current_p, current_v, u, delta_t = 0.01)
+                
+                # 3. Map to cell_id
                 next_cell_id = find_cell(next_p, next_v, p_bins, v_bins)
-                # Reward 
+                
+                # 4. Calculate reward 
                 r = reward_func(current_p)
                 
-                # Bellman update for deterministic transition
+                # 5. Bellman update for deterministic transition
                 Q = r + gamma * V[next_cell_id]
                 Q_values.append(Q)
 
@@ -59,7 +62,7 @@ def value_iteration_pendulum(transition_func, reward_func, p_bins, v_bins, grid_
         for u in actions:
             
             # calculate the next state
-            next_p, next_v = transition_func(current_p, current_v, delta_t = 0.01)
+            next_p, next_v = transition_func(current_p, current_v, u,delta_t = 0.01)
             # 3. Map to cell_id
             next_cell_id = find_cell(next_p, next_v, p_bins, v_bins)
 

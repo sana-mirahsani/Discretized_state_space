@@ -15,96 +15,64 @@
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-
+from discretized_state_space import rectangle_discretized_state_space, find_cell, find_p_v
+from value_iteration_policy import value_iteration_policy_func
 # =============================================================================
-# 1. Discretized state space
+# 1. Functions
 # =============================================================================
-def rectangle_discretized_state_space(p, v, num_grid_p, num_grid_v):
-    
-    # Discretization parameters
-    p_min, p_max = p[0], p[1]
-    v_min, v_max = v[0], v[1]
-    
-    # Define bins
-    p_bins = np.linspace(p_min, p_max, num_grid_p + 1)
-    v_bins = np.linspace(v_min, v_max, num_grid_v + 1)
-    
-    # Create dictionary of grid cells
-    grid_dict = {} # key = cell_id , value = list of corners
-    cell_id = 0
-    for i in range(num_grid_p):
-        for j in range(num_grid_v):
-            corners = [
-                (p_bins[i],   v_bins[j]),     # bottom-left
-                (p_bins[i+1], v_bins[j]),     # bottom-right
-                (p_bins[i+1], v_bins[j+1]),   # top-right
-                (p_bins[i],   v_bins[j+1])    # top-left
-            ]
-            grid_dict[cell_id] = corners
-            cell_id += 1
+# Initialize the values
+def initialization_pendulum():
+    p_tuple = (-np.pi, np.pi)
+    v_tuple = (-10,10)
+    u = [-5, 0 ,5]
+    grid_num_p = 40
+    grid_num_v = 40
 
-    # Plot the grid
-    plt.figure(figsize=(8, 6))
-    for t in p_bins:
-        plt.axvline(t, color='lightgray', linestyle='--', linewidth=0.8)
-    for w in v_bins:
-        plt.axhline(w, color='lightgray', linestyle='--', linewidth=0.8)
+    return p_tuple, v_tuple, u, grid_num_p, grid_num_v
 
-    plt.xlabel("Angle θ (radians)")
-    plt.ylabel("Angular velocity ω (rad/s)")
-    plt.title(f"Discretized State Space ({num_grid_p}x{num_grid_v} grid)")
-    plt.xlim(p_min, p_max)
-    plt.ylim(v_min, v_max)
-    plt.grid(False)
-    plt.show()
-
-    return p_bins, v_bins, grid_dict
-
+# Calculate the accelration
 def acceleration_calculation(current_p = 0, current_v = 0, current_u = 0, g = 9.81, m = 1 ,µ = 0.01, l = 1):
 
     return (1/m*pow(l,2)) * (-(µ*current_v) + (m*g*l*(np.sin(current_p)))+ current_u)
 
+# Calculate the enwt state (continues value)
 def new_state_calculation(a, current_p , current_v, delta_t = 0.01): 
     new_v = current_v + (a * delta_t) 
     new_p = current_p + (new_v * delta_t) 
     return new_p, new_v
 
-def initialization_pendulum():
-    p_tuple = (-np.pi, np.pi)
-    v_tuple = (-10,10)
-    u = [-5, 0 ,5]
-    grid_num_p = 10
-    grid_num_v = 10
-
-    return p_tuple, v_tuple, u, grid_num_p, grid_num_v
-
-def transition_calculation(current_p, current_v , delta_t = 0.01):
+# Transition function
+def transition_calculation(current_p, current_v, u, delta_t = 0.01):
     
     # 1. Compute acceleration
-    a = acceleration_calculation(current_p, current_v, g = 9.81, m = 1 ,µ = 0.01, l = 1)
+    a = acceleration_calculation(current_p, current_v, u, g = 9.81, m = 1 ,µ = 0.01, l = 1)
 
-    # 3. Compute next continuous state
-    new_p, new_v = new_state_calculation(a, current_p, current_v, delta_t)
-    
+    # 2. Compute next continuous state
+    new_p, new_v = new_state_calculation(a, current_v, current_p, delta_t)
+
     return new_p, new_v
 
-
+# Reward function
 def reward_calculation(current_p):
     return np.cos(current_p)
 
+# Main function of process
+def pendulum_solver_func():
+    # 1. Create the problem
+    p_tuple, v_tuple, u, grid_num_p, grid_num_v = initialization_pendulum()
+
+    # 2. Discretize the space
+    p_bins_array, v_bins_array, all_states = rectangle_discretized_state_space(p_tuple, v_tuple, grid_num_p ,grid_num_v)
+
+    # 3. Find the optimal policy by value iteration
+    V, policy = value_iteration_policy_func(transition_calculation, reward_calculation, p_bins_array, v_bins_array, all_states, u, gamma=0.95, epsilon=1e-6, max_iterations=1000)
+
+    # 4. Print the result
+    print(f"Value of the best policy : {V}")
+    print(f"The optimal policy : {policy}")
 # =============================================================================
-# Main
+# Run the main
 # =============================================================================     
 
 if __name__ == '__main__':     
-    p_tuple = (-np.pi, np.pi)
-    v_tuple = (-10,10)
-    grid_num_p = 40
-    grid_num_v = 40
-    u = [-5, 0 ,5]
-
-    p_bins_array, v_bins_array, all_states = rectangle_discretized_state_space(p_tuple, v_tuple, grid_num_p ,grid_num_v)
-    V, policy = value_iteration_pendulum(p_bins_array, v_bins_array, all_states, u)
-
-    print(V)
-    print(policy)
+    pendulum_solver_func()
