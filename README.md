@@ -82,6 +82,9 @@ MIT, Apache, GNU, or other.
 
 # Contact
 Author name: Sana Mirahsani
+<br>
 email: s.mirahsani1998@gmail.com
+<br>
 LinkedIn: sana_mirahsani
+<br>
 GitHub: sana_mirahsani
