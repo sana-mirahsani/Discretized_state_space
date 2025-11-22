@@ -31,13 +31,13 @@ def value_iteration_policy_func(transition_func, reward_func, p_bins, v_bins, gr
             for u in actions:
 
                 # 2. Calculate the next state
-                next_p, next_v = transition_func(current_p, current_v, u, delta_t = 0.01)
+                next_p, next_v = transition_func(current_p, current_v, u)
                 
                 # 3. Map to cell_id
                 next_cell_id = find_cell(next_p, next_v, p_bins, v_bins)
                 
                 # 4. Calculate reward 
-                r = reward_func(current_p)
+                r = reward_func(current_p, current_v, u, next_p, next_v)
                 
                 # 5. Bellman update for deterministic transition
                 Q = r + gamma * V[next_cell_id]
@@ -62,12 +62,12 @@ def value_iteration_policy_func(transition_func, reward_func, p_bins, v_bins, gr
         for u in actions:
             
             # calculate the next state
-            next_p, next_v = transition_func(current_p, current_v, u,delta_t = 0.01)
+            next_p, next_v = transition_func(current_p, current_v, u)
             # 3. Map to cell_id
             next_cell_id = find_cell(next_p, next_v, p_bins, v_bins)
 
-            
-            r = reward_func(current_p)
+            r = reward_func(current_p, current_v, u, next_p, next_v)
+
             Q = r + gamma * V[next_cell_id]
             Q_values.append(Q)
         policy[cell_id] = np.argmax(Q_values)

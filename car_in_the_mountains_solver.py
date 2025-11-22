@@ -1,14 +1,18 @@
 # ==========================================================
-# Pendulum mdp
-# state : (p,v) -> p (angular position) = (-pi, pi), v (angular velocity) = (-10, 10) 
-# action : u = {-5, 0, 5} , -5 push left, 0 do nothing, 5 push right
-# Goal : Keep p near to zero (upright), v near to zero (steadly)
-# Reward : cos(p) 
-# State space : Continuous rectangle: [-pi,pi] * [-10,10]
+# car in the mountains mdp
+# state : (p,v) -> p (current position) = (-1.2, 0.6), v (velocity) = (-0.07 ,0.07) 
+# action : u = {-1, 0, +1} 
+# Goal : reach P >= 0.5 in less than 200 interactions
+# Note : If the final state is not reached in at most 200 steps, the system is returned to its initial state.
+# Reward : -1 for each interaction
+# function clip : keep p and v in their limits
+# v_next = clip(v_current + 0.001 * u - 0.0025 * cos(3.p_current))
+# p_next = clip(p_current + v_next)
+# Initial step (fixed) : P = {- 0.6 ; - 0.4} and V = 0
+# State space : Continuous rectangle: (-1.2, 0.6) * (-0.07 ,0.07) 
+
 # How does it work:
-# Every hundredth of a second, an action is taken from {-5, 0, 5}, then a (acceleration) is calculated, 
-# then new p and v is calculated by new a , gives a new state (p,v)
-# ==========================================================
+
 
 # =============================================================================
 # 0. Libraries
@@ -21,45 +25,35 @@ from value_iteration_policy import value_iteration_policy_func
 # 1. Functions
 # =============================================================================
 # Initialize the values
-def initialization_pendulum():
-    p_tuple = (-np.pi, np.pi)
-    v_tuple = (-10,10)
-    u = [-5, 0 ,5]
+def initialization_car_in_mountains():
+    p_tuple = (-0.6, -0.4)
+    v_tuple = (0,0)
+    u = [-1, 0, +1]
     grid_num_p = 40
     grid_num_v = 40
 
     return p_tuple, v_tuple, u, grid_num_p, grid_num_v
 
-# Calculate the accelration
-def acceleration_calculation(current_p = 0, current_v = 0, current_u = 0, g = 9.81, m = 1 ,µ = 0.01, l = 1):
-
-    return (1/m*pow(l,2)) * (-(µ*current_v) + (m*g*l*(np.sin(current_p)))+ current_u)
-
-# Calculate the new state (continues value)
-def new_state_calculation(a, current_p , current_v, delta_t = 0.01): 
-    new_v = current_v + (a * delta_t) 
-    new_p = current_p + (new_v * delta_t) 
-    return new_p, new_v
+def clip(value, min_value, max_value):
+    return np.clip(value, min_value, max_value)
 
 # Transition function
-def transition_calculation(current_p, current_v, u, delta_t = 0.01):
-    
-    # 1. Compute acceleration
-    a = acceleration_calculation(current_p, current_v, u, g = 9.81, m = 1 ,µ = 0.01, l = 1)
+def transition_calculation(current_p , current_v, u): 
 
-    # 2. Compute next continuous state
-    new_p, new_v = new_state_calculation(a, current_v, current_p, delta_t)
-
+    new_v = clip(value = current_v + (0.001 * u) - (0.0025 * np.cos(3*current_p)), min_value = -0.07, max_value = 0.07)
+    new_p = clip(value = current_p + new_v, min_value = -1.2, max_value = 0.6)
     return new_p, new_v
 
 # Reward function
 def reward_calculation(current_p, current_v, u, next_p, next_v):
-    return np.cos(current_p)
+    if next_p >= 0.5:
+        return 0
+    return -1
 
 # Main function of process
-def pendulum_solver_func():
+def car_in_mointain_solver_func():
     # 1. Create the problem
-    p_tuple, v_tuple, u, grid_num_p, grid_num_v = initialization_pendulum()
+    p_tuple, v_tuple, u, grid_num_p, grid_num_v = initialization_car_in_mountains()
 
     # 2. Discretize the space
     p_bins_array, v_bins_array, all_states = rectangle_discretized_state_space(p_tuple, v_tuple, grid_num_p ,grid_num_v)
@@ -70,10 +64,11 @@ def pendulum_solver_func():
     # 4. Print the result
     print(f"Value of the best policy : {V}")
     print(f"The optimal policy : {policy}")
+
 # =============================================================================
 # Run the main
 # =============================================================================     
 
 if __name__ == '__main__':    
-    print("=============== Solving Pendulum Problem ===============")  
-    pendulum_solver_func()
+    print("=============== Solving Car Mountain Problem ===============") 
+    car_in_mointain_solver_func()
