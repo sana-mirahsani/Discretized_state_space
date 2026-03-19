@@ -46,24 +46,6 @@ def rectangle_discretized_state_space(p, v, num_grid_p, num_grid_v):
             grid_dict[cell_id] = corners
             cell_id += 1
 
-    # Remove the comment below to see the grid of the continues space
-    """
-    # Plot the grid
-    plt.figure(figsize=(8, 6))
-    for t in p_bins:
-        plt.axvline(t, color='lightgray', linestyle='--', linewidth=0.8)
-    for w in v_bins:
-        plt.axhline(w, color='lightgray', linestyle='--', linewidth=0.8)
-
-    plt.xlabel("Angle θ (radians)")
-    plt.ylabel("Angular velocity ω (rad/s)")
-    plt.title(f"Discretized State Space ({num_grid_p}x{num_grid_v} grid)")
-    plt.xlim(p_min, p_max)
-    plt.ylim(v_min, v_max)
-    plt.grid(False)
-    plt.show()
-    """
-
     return p_bins, v_bins, grid_dict
 
 # =============================================================================

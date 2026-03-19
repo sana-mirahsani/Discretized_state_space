@@ -1,90 +1,214 @@
-# Project Title
-Discretized_state_space
-<br>
-This project explores the concept of discretized state spaces in reinforcement learning through two classic control problems — the inverted pendulum and the car in the mountains.
+# 🚀 Discretized State Space in Reinforcement Learning
 
-# Project Structure
-```
+![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
+![Status](https://img.shields.io/badge/Status-Active-success.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+
+## 📌 Description
+
+Welcome to the **Discretized State Space** project!
+
+This project explores how **continuous state spaces** can be transformed into **discrete representations** for reinforcement learning. It demonstrates this concept using two classic control problems:
+
+* 🎯 Inverted Pendulum
+* 🚗 Car in the Mountains
+
+The project shows how discretization enables applying **Value Iteration** and computing optimal policies in continuous environments.
+
+---
+
+## 📂 Project Structure
+
+```bash
 project/
-│── car_in_the_mountains_solver.py
-│── discretized_state_space.py
-│── pendulum_solver.py
-│── README.md
-│── run_episode.py
-│── value_iteration_policy.py
+│
+├── car_in_the_mountains_solver.py
+├── discretized_state_space.py
+├── pendulum_solver.py
+├── run_episode.py
+├── value_iteration_policy.py
+├── README.md
 ```
 
-# How It Works
-- car_in_the_mountains_solver.py:
-    This file creates the continues space, range of P and V, Transition function, Reward function of Car in Mountain problem.
-    You can run this file which gives the optimal Value and the optimal policy of this problem by using Value iteration method.
+| File                             | Description                                                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `car_in_the_mountains_solver.py` | Defines the continuous space, transition, and reward functions for the mountain car problem   |
+| `discretized_state_space.py`     | Creates discretized grid space and handles conversions between continuous and discrete states |
+| `pendulum_solver.py`             | Defines the pendulum environment and solves it using value iteration                          |
+| `run_episode.py`                 | Runs multiple simulations and evaluates policy performance                                    |
+| `value_iteration_policy.py`      | Computes optimal policy using value iteration on discretized space                            |
 
-- discretized_state_space.py:
-    This file creates a rectangle discretized space by the range of P and V of a problem and also the number of grids, it returns the P bins and V bins and a dictionary of grid
-    which the key is a cell id and the value is the 4 corner of the cell by P and V continues.
-    <br>
-    There are two other functions find_cell and find_p_v to convert the cell_id to p and v or on the contrary. Transforming continuous values to discretized values and on the contrary.
+---
 
-- pendulum_solver.py:
-    This file creates the continues space, range of P and V, Transition function, Reward function of Pendulum problem.
-    You can run this file which gives the optimal Value and the optimal policy of this problem by using Value iteration method.
+## ✨ Features
 
-- run_episode.py:
-    This file execute the trajectory of a continuous problem with an optimal policy calculated by gridy policy in value_iteration method; 20 times and storing the R value of each execution. 
-    <br>
-    At the end, it returns the median R from the 20 executions and plot the variablity of all twenty R values.
+### 🔹 Discretized State Space
 
-- value_iteration_policy.py:
-    This is a file to calculate the optimal policy by value_iteration method (gridy policy) for a continouos problem. In this file every time the transformation of continuous Position and Velocity or on the contrary is calculated.
+* Converts continuous variables (Position, Velocity) into discrete grids
 
-**Note 1: run_episode.py, value_iteration_policy.py and discretized_state_space.py are all generic and can be used for any continous problem, just before using them you should define the continuous problem in another file.py and be imported in run_episode.py or give their transition and reward function to value_iteration_policy.py**
+* Generates:
 
-**Note 2: To use for other continuous problem check pendulum_solver.py to see how I used value_iteration_policy.py or run_episode.py for this problem**
+  * Grid cells
+  * Bin boundaries
+  * Mapping between continuous ↔ discrete states
 
-# Installation
-- git clone https://github.com/sana-mirahsani/Discretized_state_space
-- cd project
+* Utility functions:
 
-# Usage
+  * `find_cell` → continuous → discrete
+  * `find_p_v` → discrete → continuous
+
+---
+
+### 🔹 Reinforcement Learning Solvers
+
+#### 🚗 Car in the Mountains
+
+* Continuous state space modeling
+* Transition & reward functions
+* Optimal policy via Value Iteration
+
+#### 🎯 Inverted Pendulum
+
+* Physics-based continuous environment
+* Solved using discretization + Value Iteration
+
+---
+
+### 🔹 Value Iteration
+
+* Grid-based policy computation
+* Handles continuous → discrete transformations internally
+* Generic implementation usable for other problems
+
+---
+
+### 🔹 Episode Simulation
+
+* Run **20 trajectories** using optimal policy
+* Compute:
+
+  * 📊 Return values
+  * 📈 Median return
+  * 📉 Variability visualization
+
+---
+
+## ⚙️ Requirements
+
+* Python 3.x
+* NumPy
+* Matplotlib
+
+Install dependencies:
+
+```bash
+pip install numpy matplotlib
+```
+
+---
+
+## ▶️ How to Use
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sana-mirahsani/Discretized_state_space
+cd Discretized_state_space
+```
+
+### 2. Run simulation
+
+```bash
 python run_episode.py
+```
 
-**Note 3: There are two problems in run_episode.py, pendulum and car in mountain; to run each of these problems, make one of them as comment in the main function and uncomment the other one to see the Plot of lists of Return values in 20 execution and the Median return value.**
+### ⚠️ Notes
 
-# Results:
-## Result of R Median and R values in 20 execution for Pendulum problem: 
+* Two problems are included:
 
-![](images/Figure_pendulum.png)
+  * Pendulum
+  * Car in the Mountains
 
-## Result of R Median and R values in 20 execution for Car in Mountain problem: 
+👉 To run one:
 
-![](images/Figure_car_in_mountain.png)
+* Comment one problem in `run_episode.py`
+* Uncomment the other
 
-**Note 4: Try to add other results of other continuous problems**
+---
 
-# Contributing
-Contributions are welcome! If you would like to improve this project, please follow the guidelines below:
+## 📊 Results
 
-- Pull Requests:
-    Fork the repository and create your feature branch.
+### 🎯 Pendulum Problem
 
-- Code Style:
-    - Follow the existing coding style and conventions of the project.
+* Median return over 20 runs
+* Variability of returns
 
-    - Use meaningful variable and function names.
+![Pendulum Result](images/Figure_pendulum.png)
 
-    - Format code using tools such as black, flake8, or prettier (depending on the language).
+---
 
-    - Add comments for complex logic and document functions if needed.
+### 🚗 Car in the Mountains
 
-# License
+* Median return over 20 runs
+* Variability of returns
 
-MIT, Apache, GNU, or other.
+![Car Result](images/Figure_car_in_mountain.png)
 
-# Contact
-Author name: Sana Mirahsani
-<br>
-email: s.mirahsani1998@gmail.com
-<br>
-LinkedIn: sana_mirahsani
-<br>
-GitHub: sana_mirahsani
+---
+
+## 💡 Additional Notes
+
+* `run_episode.py`, `value_iteration_policy.py`, and `discretized_state_space.py` are **generic**
+* You can reuse them for **any continuous control problem**
+
+👉 To extend:
+
+* Define a new environment (transition + reward)
+* Plug it into the existing framework
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+### 🔹 How to Contribute
+
+* Fork the repository
+* Create a feature branch
+* Submit a pull request
+
+### 🔹 Code Guidelines
+
+* Follow existing coding style
+* Use meaningful variable names
+* Add comments for complex logic
+* Format code using:
+
+  * `black`
+  * `flake8`
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License** (or similar).
+
+---
+
+## 👩‍💻 Author
+
+**Sana Mirahsani**
+📧 [s.mirahsani1998@gmail.com](mailto:s.mirahsani1998@gmail.com)
+🔗 LinkedIn: sana-mirahsani
+💻 GitHub: sana-mirahsani
+
+---
+
+## ⭐ Support
+
+If you find this project useful:
+
+* ⭐ Star the repo
+* 🍴 Fork it
+* 🚀 Use it in your RL projects
